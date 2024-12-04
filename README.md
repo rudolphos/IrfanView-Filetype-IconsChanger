@@ -1,6 +1,7 @@
 # IrfanView Filetype Icon Changer
 
 This tool allows you to easily change the default icons for popular image file formats (.jpeg, .jpg, .png, .gif, .webp) associated with IrfanView on Windows 10/11. It is designed to work with the 64-bit version of IrfanView.
+The icons included in this pack are visually distinct. Even when zoomed out to the smallest icon size (16x16), each image format (e.g., `.jpeg`, `.jpg`, `.png`, `.gif`, `.webp`) has a unique and easily distinguishable icon. This ensures that each file type is identifiable in File Explorer's "Detail" view, where icons can appear very small.
 
 ---
 
@@ -13,7 +14,7 @@ This tool allows you to easily change the default icons for popular image file f
 
 ## Usage:
 1. **Change Icons**:
-   - Run the `run.bat` script to replace the default filetype icons for the supported image formats with your custom icons.
+   - Run the `run.bat` script As Administrator to replace the default filetype icons for the supported image formats with your custom icons.
    - The script will copy the icons to a safe location in `ProgramData` and update the registry.
 
 2. **Revert to Default Icons**:
