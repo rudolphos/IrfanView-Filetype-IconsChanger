@@ -11,7 +11,7 @@ if not exist "%ICONS_SOURCE%" (
     exit /b
 )
 
-:: Verify at least one .ico file exists in the Icon folder
+:: Verify at least one .ico file exists in the Icons folder
 dir "%ICONS_SOURCE%\*.ico" >nul 2>&1
 if errorlevel 1 (
     echo No .ico files found in the 'Icons' folder. Ensure it contains valid .ico files.
@@ -19,7 +19,7 @@ if errorlevel 1 (
     exit /b
 )
 
-:: Create icon directory in ProgramData
+:: Create icon directory in ProgramData if it doesn't exist
 if not exist "%ICON_DIR%" (
     mkdir "%ICON_DIR%"
     echo Created directory: %ICON_DIR%
@@ -33,15 +33,17 @@ if errorlevel 1 (
     exit /b
 )
 
-:: Register filetype icons for IrfanView
-echo Updating registry for IrfanView...
+:: Register filetype icons
+echo Updating registry...
 
+:: Register .jpeg and .jpg with the custom icons
 reg add "HKEY_CLASSES_ROOT\IrfanView.jpg\DefaultIcon" /ve /d "%ICON_DIR%\jpg.ico,0" /f
-reg add "HKEY_CLASSES_ROOT\IrfanView.jpeg\DefaultIcon" /ve /d "%ICON_DIR%\jpeg.ico,0" /f
-reg add "HKEY_CLASSES_ROOT\IrfanView.jfif\DefaultIcon" /ve /d "%ICON_DIR%\jfif.ico,0" /f
-reg add "HKEY_CLASSES_ROOT\IrfanView.gif\DefaultIcon" /ve /d "%ICON_DIR%\gif.ico,0" /f
-reg add "HKEY_CLASSES_ROOT\IrfanView.png\DefaultIcon" /ve /d "%ICON_DIR%\png.ico,0" /f
-reg add "HKEY_CLASSES_ROOT\IrfanView.webp\DefaultIcon" /ve /d "%ICON_DIR%\webp.ico,0" /f
+reg add "HKEY_CLASSES_ROOT\IrfanView.jpeg\DefaultIcon" /ve /d "%ICON_DIR%\jpg.ico,0" /f
+
+:: Register .gif, .png, .webp extensions (same process for each)
+reg add "HKEY_CLASSES_ROOT\SystemFileAssociations\.gif\DefaultIcon" /ve /d "%ICON_DIR%\gif.ico,0" /f
+reg add "HKEY_CLASSES_ROOT\SystemFileAssociations\.png\DefaultIcon" /ve /d "%ICON_DIR%\png.ico,0" /f
+reg add "HKEY_CLASSES_ROOT\SystemFileAssociations\.webp\DefaultIcon" /ve /d "%ICON_DIR%\webp.ico,0" /f
 
 :: Refresh the icon cache
 echo Refreshing icon cache...
