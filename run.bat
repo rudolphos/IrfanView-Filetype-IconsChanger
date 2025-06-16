@@ -19,32 +19,24 @@ if errorlevel 1 (
     exit /b
 )
 
-:: Create or clean the icon directory in ProgramData
-if exist "%ICON_DIR%" (
-    echo Cleaning up existing icons...
-    attrib -R -H -S "%ICON_DIR%\*.ico"
-    del /q "%ICON_DIR%\*.ico"
-) else (
-    echo Creating icon directory...
+:: Create icon directory in ProgramData if it doesn't exist
+if not exist "%ICON_DIR%" (
     mkdir "%ICON_DIR%"
-    if errorlevel 1 (
-        echo Failed to create directory: %ICON_DIR%. Check permissions.
-        pause
-        exit /b
-    )
+    echo Created directory: %ICON_DIR%
 )
 
 :: Copy icons to ProgramData
-echo Copying icons...
-xcopy /y /q /r "%ICONS_SOURCE%\*.ico" "%ICON_DIR%"
+xcopy /y /q "%ICONS_SOURCE%\*.ico" "%ICON_DIR%"
 if errorlevel 1 (
-    echo Failed to copy icons. Check if files are locked or permissions are adequate.
+    echo Failed to copy icons. Please check permissions and file paths.
     pause
     exit /b
 )
 
-:: Update registry entries for IrfanView
+:: Register filetype icons
 echo Updating registry...
+
+:: Register .jpeg and .jpg with the custom icons
 reg add "HKEY_CLASSES_ROOT\IrfanView.jpg\DefaultIcon" /ve /d "%ICON_DIR%\jpg.ico,0" /f
 reg add "HKEY_CLASSES_ROOT\IrfanView.jpeg\DefaultIcon" /ve /d "%ICON_DIR%\jpg.ico,0" /f
 reg add "HKEY_CLASSES_ROOT\IrfanView.gif\DefaultIcon" /ve /d "%ICON_DIR%\gif.ico,0" /f
