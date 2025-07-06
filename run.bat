@@ -1,76 +1,52 @@
 @echo off
-:: Prompt UAC if script is not elevated
-net session >nul 2>&1
-if %errorlevel% neq 0 (
-	:: call UAC prompt
-	echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
-	echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
-	"%temp%\getadmin.vbs"
-	exit /b
-)
-
 :: Set variables
-set "BATCH_FOLDER=%~dp0"
-set "ICONS_SOURCE=%BATCH_FOLDER%\Icons"
-set "ICONS_TARGET=%ProgramData%\IrfanView_FileIconOverrides"
+set "ICON_DIR=%ProgramData%\CustomIcons"
+set "SCRIPT_DIR=%~dp0"
+set "ICONS_SOURCE=%SCRIPT_DIR%Icon"
 
 :: Verify the Icons folder exists
 if not exist "%ICONS_SOURCE%" (
-	echo The 'Icons' folder is missing. Create one containing .ico files then re-run the script.
-	pause
-	exit /b
+    echo The 'Icons' folder is missing. Place the folder in the same directory as this script.
+    pause
+    exit /b
 )
 
 :: Verify at least one .ico file exists in the Icons folder
 dir "%ICONS_SOURCE%\*.ico" >nul 2>&1
 if errorlevel 1 (
-    echo No '.ico' files found in the 'Icons' folder. Add at least one to the folder then re-run the script.
+    echo No .ico files found in the 'Icons' folder. Ensure it contains valid .ico files.
     pause
     exit /b
 )
 
 :: Create icon directory in ProgramData if it doesn't exist
-if not exist "%ICONS_TARGET%" (
-	mkdir "%ICONS_TARGET%"
-	echo Created directory:	%ICONS_TARGET%
+if not exist "%ICON_DIR%" (
+    mkdir "%ICON_DIR%"
+    echo Created directory: %ICON_DIR%
 )
 
 :: Copy icons to ProgramData
-xcopy /y /q "%ICONS_SOURCE%\*.ico" "%ICONS_TARGET%"
+xcopy /y /q "%ICONS_SOURCE%\*.ico" "%ICON_DIR%"
 if errorlevel 1 (
-	echo Failed to copy icons. Check user permissions and/or access to file paths.
-	pause
-	exit /b
+    echo Failed to copy icons. Please check permissions and file paths.
+    pause
+    exit /b
 )
 
 :: Register filetype icons
 echo Updating registry...
 
-:: Register new and existing icons
-for %%i in ("%ICONS_SOURCE%\*.ico") do (
-	reg query "HKCR\IrfanView.%%~ni" > nul
-	if %errorlevel% neq 0 (
-		:: override extension default for previously default icons
-		reg add "HKCR\.%%~ni" /ve /d "IrfanView.%%~ni" /f > nul
-
-		:: copy irfanview key and shell\open\command subkeys, same for every type
-		reg copy "HKCR\IrfanView" "HKCR\IrfanView.%%~ni" /s /f > nul
-		
-		echo ::  Successfully reated new file type association for [[ %%~ni ]]
-	)
-	
-	:: [[ personal ]] remove IrfanView prefix from explorer extension name
-	reg add "HKCR\IrfanView.%%~ni" /ve /d "%%~ni File" /f > nul
-	
-	:: override pointer from old icon to new icon
-	reg add "HKCR\IrfanView.%%~ni\DefaultIcon" /ve /d "%ICONS_TARGET%\%%~nxi,0" /f > nul
-	echo ::  Successfully set new file type icon for [[ %%~ni ]]
-)
+:: Register .jpeg and .jpg with the custom icons
+reg add "HKEY_CLASSES_ROOT\IrfanView.jpg\DefaultIcon" /ve /d "%ICON_DIR%\jpg.ico,0" /f
+reg add "HKEY_CLASSES_ROOT\IrfanView.jpeg\DefaultIcon" /ve /d "%ICON_DIR%\jpg.ico,0" /f
+reg add "HKEY_CLASSES_ROOT\IrfanView.gif\DefaultIcon" /ve /d "%ICON_DIR%\gif.ico,0" /f
+reg add "HKEY_CLASSES_ROOT\IrfanView.png\DefaultIcon" /ve /d "%ICON_DIR%\png.ico,0" /f
+reg add "HKEY_CLASSES_ROOT\IrfanView.webp\DefaultIcon" /ve /d "%ICON_DIR%\webp.ico,0" /f
 
 :: Refresh the icon cache
-echo Restarting explorer for effect
+echo Refreshing icon cache...
 taskkill /im explorer.exe /f >nul
 start explorer.exe
 
-echo IrfanView file icons overridden successfully!
+echo Icons updated successfully!
 pause
