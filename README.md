@@ -10,8 +10,8 @@ The icons included in this pack are selected to be visually distinct. Even when 
 
 ## Installation:
 1. **Download the repository**: Clone or download this repository to your local machine.
-2. **Place Icons in the Correct Folder**: Ensure that the `Icons` folder contains the `.ico` files you want to use for each file format. The default icons should be named accordingly (e.g., `jpeg.ico`, `jpg.ico`, `png.ico`, `gif.ico`, `webp.ico`).
-3. **Run the Script**: Execute the provided `run.bat` script to automatically update the filetype icons in the Windows registry.
+2. **Place Icons in the Correct Folder**: Ensure that the `Icon` folder contains the `.ico` files you want to use for each file format. The default icons should be named accordingly (e.g., `jpeg.ico`, `jpg.ico`, `png.ico`, `gif.ico`, `webp.ico`).
+3. **Run the Script**: Execute the provided `run.bat` script to automatically update the filetype icons in the Windows registry (e.g., `HKEY_CLASSES_ROOT\IrfanView.xxx\DefaultIcon`).
 
 ---
 
