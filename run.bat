@@ -1,17 +1,21 @@
 @echo off
 :: Prompt UAC if script is not elevated
-net session >nul 2>&1
-if %errorlevel% neq 0 (
-	:: call UAC prompt
-	echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
-	echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
-	"%temp%\getadmin.vbs"
+:: (fltmc needs admin and, unlike "net session", doesn't depend on the Server service)
+fltmc >nul 2>&1
+if errorlevel 1 (
+	:: already tried elevating once? stop instead of looping forever
+	if "%~1"=="elevated" (
+		echo Could not obtain administrator rights. Right-click run.bat and choose "Run as administrator".
+		pause
+		exit /b 1
+	)
+	powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -ArgumentList 'elevated' -Verb RunAs"
 	exit /b
 )
 
 :: Set variables
 set "BATCH_FOLDER=%~dp0"
-set "ICONS_SOURCE=%BATCH_FOLDER%\Icons"
+set "ICONS_SOURCE=%BATCH_FOLDER%Icon"
 set "ICONS_TARGET=%ProgramData%\IrfanView_FileIconOverrides"
 
 :: Verify the Icons folder exists
@@ -48,8 +52,8 @@ echo Updating registry...
 
 :: Register new and existing icons
 for %%i in ("%ICONS_SOURCE%\*.ico") do (
-	reg query "HKCR\IrfanView.%%~ni" > nul
-	if %errorlevel% neq 0 (
+	reg query "HKCR\IrfanView.%%~ni" >nul 2>&1
+	if errorlevel 1 (
 		:: override extension default for previously default icons
 		reg add "HKCR\.%%~ni" /ve /d "IrfanView.%%~ni" /f > nul
 
@@ -60,7 +64,7 @@ for %%i in ("%ICONS_SOURCE%\*.ico") do (
 	)
 	
 	:: [[ personal ]] remove IrfanView prefix from explorer extension name
-	reg add "HKCR\IrfanView.%%~ni" /ve /d "%%~ni File" /f > nul
+	call :setname "%%~ni"
 	
 	:: override pointer from old icon to new icon
 	reg add "HKCR\IrfanView.%%~ni\DefaultIcon" /ve /d "%ICONS_TARGET%\%%~nxi,0" /f > nul
@@ -74,3 +78,11 @@ start explorer.exe
 
 echo IrfanView file icons overridden successfully!
 pause
+exit /b
+
+:setname
+:: Set the Explorer type name to e.g. "JPG File" (extension in upper case)
+set "EXT_UP=%~1"
+for %%L in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do call set "EXT_UP=%%EXT_UP:%%L=%%L%%"
+reg add "HKCR\IrfanView.%~1" /ve /d "%EXT_UP% File" /f > nul
+exit /b
